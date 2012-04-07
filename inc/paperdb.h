@@ -6,7 +6,8 @@
 // -wik
 #define PAPERDB_CT_INT		0
 #define PAPERDB_CT_STRING 	1
-#define PAPERDB_CT_BLOB 	2
+#define PAPERDB_CT_TEXT		2
+#define PAPERDB_CT_BLOB 	3
 
 // modifiers
 #define PAPERDB_MOD_UNSIGNED	1
@@ -17,23 +18,42 @@
 typedef struct
 {
 	char* fileName;
-	unsigned int id;	
+	unsigned long id;	
 } paperdb_file;
 
 
 typedef struct
 {
 	char* name;
-	unsigned int tp;
-	unsigned int size;
+	unsigned long tp;
+	unsigned long size;
 } paperdb_column;
+
+
+typedef struct
+{
+	unsigned long start_file_id;
+	unsigned long start_file_loc;
+	unsigned long next; 
+	void** vals;
+} paperdb_row
 
 typedef struct
 {
 	char* name;
-	unsigned int id;
-	unsigned int start_filed_id;
-	unsigned int start_file_loc;
+	unsigned long id;
+	unsigned long start_filed_id;
+	unsigned long start_file_loc;
+	paperdb_column** cols;
 } paperdb_table;
+
+typedef struct
+{
+	char* name;
+	paperdb_table** tables;
+	paperdb_file** files;
+	unsigned long 
+} paperdb_sys;
+
 
 #endif
