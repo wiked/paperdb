@@ -14,6 +14,7 @@
 #define PAPERDB_MOD_NOTNULL	2
 #define PAPERDB_MOD_UNIQUE	4
 
+paperdb_file* paperdbGetFile(unsigned long id);
 
 typedef struct
 {
