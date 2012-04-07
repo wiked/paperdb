@@ -36,7 +36,7 @@ typedef struct
 	unsigned long start_file_loc;
 	unsigned long next; 
 	void** vals;
-} paperdb_row
+} paperdb_row;
 
 typedef struct
 {
