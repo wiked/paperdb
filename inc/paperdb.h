@@ -14,7 +14,6 @@
 #define PAPERDB_MOD_NOTNULL	2
 #define PAPERDB_MOD_UNIQUE	4
 
-paperdb_file* paperdbGetFile(unsigned long id);
 
 typedef struct
 {
@@ -53,8 +52,10 @@ typedef struct
 	char* name;
 	paperdb_table** tables;
 	paperdb_file** files;
-	unsigned long 
+	unsigned long thingy;
 } paperdb_sys;
+
+paperdb_file* paperdbGetFile(unsigned long id);
 
 
 #endif

@@ -1,1 +1,1 @@
-gcc -o bin/paperdb main.c
+gcc -o bin/paperdb main.c inc/*.c
