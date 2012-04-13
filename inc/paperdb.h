@@ -15,6 +15,7 @@
 #define PAPERDB_MOD_NOTNULL	2
 #define PAPERDB_MOD_UNIQUE	4
 
+#define PAPERDB_VERSION 	"PAPERDB VERSION 0.01"
 
 // paperdb_file
 typedef struct
@@ -48,8 +49,10 @@ typedef struct
 {
 	char* name;
 	unsigned long id;
-	unsigned long start_file_id;
-	unsigned long start_file_loc;
+	unsigned long schema_file_id;
+	unsigned long schema_file_loc;
+	unsigned long data_file_id;
+	unsigned long data_file_loc;
 	paperdb_column** cols;
 } paperdb_table;
 
@@ -65,6 +68,8 @@ typedef struct
 paperdb_file*	paperdbGetFile(unsigned long id, paperdb_sys* sys);
 paperdb_sys* 	paperdbCreateSystem();
 paperdb_sys* 	paperdbOpenSys(char* filename);
+unsigned long	paperdbNewFile(paperdb_sys* sys, char* nm);
+unsigned long	paperdbAddFile(paperdb_sys* sys, paperdb_file* f);
 
 
 #endif

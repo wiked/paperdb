@@ -2,10 +2,13 @@
 
 int main()
 {
-	paperdb_table* tbl = malloc(sizeof(paperdb_table));	
-	paperdb_sys* beep = paperdbOpenSys("blarg.txt"); 
-	tbl->name = "yup\n";
-	printf(tbl->name);
-	free(tbl);
+	paperdb_sys* sys = paperdbCreateSystem();
+	unsigned long fid = paperdbNewFile(sys, "temp.paper");
+	if(fid != NULL)
+	{
+		sprintf("fid: %d", fid);
+		fclose(sys->files[0]);
+
+	}
 	return 0;
 }
