@@ -1,6 +1,8 @@
 #ifndef _PAPERDB_H_06APR2012
 #define _PAPERDB_H_06APR2012
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // column types.
 // that's what the CT stands for.
@@ -16,11 +18,12 @@
 #define PAPERDB_MOD_UNIQUE	4
 
 #define PAPERDB_VERSION 	"PAPERDB VERSION 0.01"
+#define PAPERDB_COL_TYPE	unsigned long
 
 // paperdb_file
 typedef struct
 {
-	char* fileName;
+	char* filename;
 	unsigned long id;
 	unsigned long schemaOffset;
 	unsigned long dataOffset;	
@@ -65,11 +68,14 @@ typedef struct
 } paperdb_sys;
 
 
+
 paperdb_file*	paperdbGetFile(unsigned long id, paperdb_sys* sys);
 paperdb_sys* 	paperdbCreateSystem();
 paperdb_sys* 	paperdbOpenSys(char* filename);
 unsigned long	paperdbNewFile(paperdb_sys* sys, char* nm);
 unsigned long	paperdbAddFile(paperdb_sys* sys, paperdb_file* f);
-
+paperdb_table*	paperdbCreateTable(paperdb_sys* sys, char* nm);
+void		paperdbAddColumn(paperdb_table* tbl, char* nm, PAPERDB_COL_TYPE tp, unsigned long sz);
+char		paperdbErrorNullCheckArr(void** tst,unsigned long nArgs, char* errStartString, char** errSufs, FILE* fout);
 
 #endif
