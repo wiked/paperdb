@@ -26,7 +26,8 @@ typedef struct
 	char* filename;
 	unsigned long id;
 	unsigned long schemaOffset;
-	unsigned long dataOffset;	
+	unsigned long dataOffset;
+	unsigned long fileInfoOffset;	
 	FILE* file;
 } paperdb_file;
 
