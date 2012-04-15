@@ -57,6 +57,7 @@ typedef struct
 	unsigned long data_file_id;
 	unsigned long data_file_loc;
 	paperdb_column** cols;
+	unsigned long numCols;
 } paperdb_table;
 
 // paperd_sys
@@ -77,5 +78,6 @@ unsigned long	paperdbAddFile(paperdb_sys* sys, paperdb_file* f);
 paperdb_table*	paperdbCreateTable(paperdb_sys* sys, char* nm);
 void		paperdbAddColumn(paperdb_table* tbl, char* nm, PAPERDB_COL_TYPE tp, unsigned long sz);
 char		paperdbErrorNullCheckArr(void** tst,unsigned long nArgs, char* errStartString, char** errSufs, FILE* fout);
-
+char		paperdbSaveTable(paperdb_sys* sys, paperdb_table* tbl);
+char		paperdbWriteColumns(paperdb_column** cols, unsigned long numCols, FILE* fout);
 #endif

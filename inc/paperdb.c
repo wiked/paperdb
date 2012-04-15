@@ -167,3 +167,31 @@ char		paperdbErrorNullCheckArr(void** tst, unsigned long nArgs, char* errStartSt
 	}
 	return ret;
 }
+
+
+char	paperdbWriteColumns(paperdb_column** cols, unsigned long numCols, FILE* fout)
+{
+//	unsigned long numCols = (sizeof(cols)/sizeof(cols[0]));
+	// first, write how many columns we've got
+	fwrite(&numCols, sizeof(numCols), 1, fout);
+	int i = 0;
+	for(;i< numCols;++i)
+	{
+		char* nm = cols[i]->name;
+		unsigned long nmSz = sizeof(nm);
+		fwrite(&nmSz, sizeof(nmSz), 1, fout);
+		fwrite(nm, nmSz, 1, fout);		
+		unsigned long tp = cols[i]->tp;	
+		unsigned long sz = cols[i]->size;
+		fwrite(&tp, sizeof(unsigned long), 1, fout);
+		fwrite(&sz, sizeof(unsigned long), 1, fout); 
+	} 
+}
+
+char	paperdbSaveTable(paperdb_sys* sys, paperdb_table* tbl)
+{
+	char ret = 0;
+	
+	
+	return ret;
+}
