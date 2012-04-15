@@ -11,5 +11,5 @@ Paperdb is oriented for applications needing very fast input and limited search 
 So, is it Paperdb or paperdb?
 -----------------------------
 
-The name of the application and repository is paperdb.  It only gets capitalized in the beginning of sentences, like other nouns in the English language.  If you're writing *auf Deutche* feel free to capitalize "Der Paperdb".  German is kind of odd like.
+The name of the application and repository is paperdb.  It only gets capitalized in the beginning of sentences, like other nouns in the English language.  If you're writing *auf Deutche* feel free to capitalize "Der Paperdb".  German is kind of odd like that.
 
