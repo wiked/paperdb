@@ -19,31 +19,48 @@ int main()
 	paperdbAddColumn(tbl, "tp", PAPERDB_CT_STRING, 10); 
 	printf("column created on tbl '%s': '%s'", tbl->name, tbl->cols[1]->name);
 	fflush(stdout);
-	paperdbWriteColumns(tbl->cols, 2, sys->files[0]->file);
-	fclose(sys->files[0]->file);
-	FILE* fin = fopen("temp.paper", "r");
-	fseek(fin, pos, SEEK_SET);
-	unsigned long numCols;
-	fread(&numCols, sizeof(numCols), 1, fin);
-	printf("Number of cols: %lu\n", numCols);
-	int i = 0;
-	for(;i<numCols; ++i)
-	{
-		unsigned long sz;
-		fread(&sz, sizeof(sz), 1, fin);
-		printf("name size: %lu\n", sz);
-		fflush(stdout);
-		char* nm = malloc(sz);
-		fread(nm, sz, 1, fin);
-		unsigned long tp;
-		fread(&tp, sizeof(tp), 1, fin);
-		unsigned long colSz;
-		fread(&colSz, sizeof(colSz), 1, fin);
-
-		printf("Found column:\n\tname:\t'%s'\n\ttp:\t%lu\n\tsz:\t%lu\n", nm, tp, colSz);
-		fflush(stdout);
-	}
 	
+
+	paperdb_file* f = sys->files[0];
+	printf("Setting up offsets\n");
+	fflush(stdout);
+
+
+	sys->files[0]->nextTablePos = pos+50;
+	sys->files[0]->schemaOffset = pos+50;
+	pos = ftell(f->file);
+
+	printf("Padding file\n");
+	fflush(stdout);
+
+	unsigned long blankSz = (2000);
+	char* tmp = malloc(blankSz);
+	unsigned long charSz = sizeof(char);
+	unsigned long charNum = blankSz/charSz;
+	printf("CharSz: %lu\n CharNum: %lu\n", charSz, charNum);
+	fflush(stdout);
+	memset(tmp, ' ', blankSz);
+
+	printf("writeout\n");
+	fflush(stdout);
+
+	fwrite(tmp, blankSz,1, f->file);
+	printf("And we're walking!\n");
+	fflush(stdout);
+
+	free(tmp);
+	printf("Done freeing\n");
+	fflush(stdout);
+
+	fseek(f->file,f->schemaOffset,SEEK_SET);
+	printf("done seeking\n");
+	fflush(stdout);
+
+	paperdbSaveTable(sys, tbl, sys->files[0]);		
+	printf("Done saving table\n");
+	fflush(stdout);
+
+	fclose(f->file);
 
 	return 0;
 }

@@ -27,7 +27,10 @@ typedef struct
 	unsigned long id;
 	unsigned long schemaOffset;
 	unsigned long dataOffset;
-	unsigned long fileInfoOffset;	
+	unsigned long fileInfoOffset;
+	unsigned long nextTablePos;
+	unsigned long nextDataPos;
+	unsigned long nextFilePos;	
 	FILE* file;
 } paperdb_file;
 
@@ -71,14 +74,16 @@ typedef struct
 
 
 
-paperdb_file*	paperdbGetFile(unsigned long id, paperdb_sys* sys);
-paperdb_sys* 	paperdbCreateSystem();
-paperdb_sys* 	paperdbOpenSys(char* filename);
-unsigned long	paperdbNewFile(paperdb_sys* sys, char* nm);
-unsigned long	paperdbAddFile(paperdb_sys* sys, paperdb_file* f);
-paperdb_table*	paperdbCreateTable(paperdb_sys* sys, char* nm);
-void		paperdbAddColumn(paperdb_table* tbl, char* nm, PAPERDB_COL_TYPE tp, unsigned long sz);
-char		paperdbErrorNullCheckArr(void** tst,unsigned long nArgs, char* errStartString, char** errSufs, FILE* fout);
-char		paperdbSaveTable(paperdb_sys* sys, paperdb_table* tbl);
-char		paperdbWriteColumns(paperdb_column** cols, unsigned long numCols, FILE* fout);
+paperdb_file*		paperdbGetFile(unsigned long id, paperdb_sys* sys);
+paperdb_sys* 		paperdbCreateSystem();
+paperdb_sys* 		paperdbOpenSys(char* filename);
+unsigned long		paperdbNewFile(paperdb_sys* sys, char* nm);
+unsigned long		paperdbAddFile(paperdb_sys* sys, paperdb_file* f);
+paperdb_table*		paperdbCreateTable(paperdb_sys* sys, char* nm);
+void			paperdbAddColumn(paperdb_table* tbl, char* nm, PAPERDB_COL_TYPE tp, unsigned long sz);
+char			paperdbErrorNullCheckArr(void** tst,unsigned long nArgs, char* errStartString, char** errSufs, FILE* fout);
+char			paperdbSaveTable(paperdb_sys* sys, paperdb_table* tbl, paperdb_file* f);
+char			paperdbWriteColumns(paperdb_column** cols, unsigned long numCols, FILE* fout);
+paperdb_table* 		paperdbReadTable(FILE* fin);
+paperdb_column**	paperdbReadCols(FILE* fin, paperdb_table* tbl);
 #endif

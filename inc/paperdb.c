@@ -84,11 +84,11 @@ paperdb_table*	paperdbCreateTable(paperdb_sys* sys, char* nm)
 	
 	paperdb_table* ret = NULL;
 
-	void** tst  = {&sys, &sys->files, nm};
+	void* tst[]  = {&sys, &sys->files, nm};
 	char* sufs[] = {"Paperdb system not initialized", "No Files in paperdb_sys object", "Table name is NULL"};
 	
 	
-	char tester = paperdbErrorNullCheckArr(tst, 3, "paperdbCreateTable failed. ",&sufs, stderr);
+	char tester = paperdbErrorNullCheckArr(tst, 3, "paperdbCreateTable failed. ",sufs, stderr);
 	if(!tester)
 	{
 
@@ -121,6 +121,7 @@ void		paperdbAddColumn(paperdb_table* tbl, char* nm, PAPERDB_COL_TYPE tp, unsign
 		{
 			tbl->cols = malloc(sizeof(paperdb_column*));
 			tbl->cols[0] = col;
+			tbl->numCols = 1;
 		}
 		else
 		{
@@ -131,6 +132,7 @@ void		paperdbAddColumn(paperdb_table* tbl, char* nm, PAPERDB_COL_TYPE tp, unsign
 			newCols[idx] = col;
 			free(tbl->cols);
 			tbl->cols = newCols;
+			tbl->numCols += 1;
 		}
 	}
 	return;
@@ -158,9 +160,10 @@ char		paperdbErrorNullCheckArr(void** tst, unsigned long nArgs, char* errStartSt
 		
 		char* tmpSuf = errSufs[i];
 		unsigned long sufLen = strlen(tmpSuf)+1;
-		char* tmpStr = malloc(sizeof(char)*(startLen+sufLen));
+		char* tmpStr = malloc(sizeof(char)*(startLen+sufLen+1));
 		strcpy(tmpStr, errStartString);
 		strcat(tmpStr, tmpSuf);
+		strcat(tmpStr, "\n");
 
 		ret = ret || paperdbErrorNullCheck(tst[i],tmpStr, fout);
 		free(tmpStr);
@@ -171,7 +174,6 @@ char		paperdbErrorNullCheckArr(void** tst, unsigned long nArgs, char* errStartSt
 
 char	paperdbWriteColumns(paperdb_column** cols, unsigned long numCols, FILE* fout)
 {
-//	unsigned long numCols = (sizeof(cols)/sizeof(cols[0]));
 	// first, write how many columns we've got
 	fwrite(&numCols, sizeof(numCols), 1, fout);
 	int i = 0;
@@ -188,10 +190,98 @@ char	paperdbWriteColumns(paperdb_column** cols, unsigned long numCols, FILE* fou
 	} 
 }
 
-char	paperdbSaveTable(paperdb_sys* sys, paperdb_table* tbl)
+void	paperdbWriteULong(unsigned long* val, FILE* fout)
+{	
+	fwrite(val, sizeof(unsigned long), 1, fout);
+}
+
+void	paperdbWriteString(char* nm, FILE* fout)
 {
-	char ret = 0;
-	
-	
+	unsigned long nmSz = sizeof(nm);
+	fwrite(&nmSz, sizeof(nmSz), 1, fout);
+	fwrite(nm, nmSz, 1, fout);
+}
+
+unsigned long paperdbReadULong(FILE* fin)
+{
+	unsigned long lng;
+	fread(&lng, 1, sizeof(unsigned long), fin);
+	return lng;
+}
+
+char* paperdbReadString(FILE* fin)
+{
+	unsigned long nmSz = paperdbReadULong(fin);
+	char* tmp = malloc(nmSz);
+	fread(tmp, 1, nmSz, fin);
+	return tmp;
+}
+
+paperdb_column** paperdbReadCols(FILE* fin, paperdb_table* tbl)
+{
+	paperdb_column** ret = NULL;
+	if(!(paperdbErrorNullCheck(fin, "paperdbReadCols failed.  fin was NULL\n", stdout) || paperdbErrorNullCheck(tbl, "paperdbReadCols failed. tbl was NULL\n", stdout)))
+	{
+		unsigned long numCols = paperdbReadULong(fin);
+		ret = malloc(sizeof(paperdb_column*)*numCols);
+		tbl->numCols = numCols;
+		int i = 0;
+		for(;i<numCols; ++i)
+		{
+			char* nm = paperdbReadString(fin);
+			unsigned long tp = paperdbReadULong(fin);
+			unsigned long sz = paperdbReadULong(fin);
+			ret[i] = malloc(sizeof(paperdb_column));
+			ret[i]->name = nm;
+			ret[i]->tp = tp;
+			ret[i]->size = sz;
+		}
+	}
 	return ret;
 }
+
+paperdb_table* paperdbReadTable(FILE* fin)
+{
+	paperdb_table* ret = NULL;
+	if(!paperdbErrorNullCheck(fin, "paperdbReadTable failed. fin was NULL.",stdout))
+	{
+		unsigned long id = paperdbReadULong(fin);
+		char* nm = paperdbReadString(fin);
+		unsigned long dfi = paperdbReadULong(fin);
+		unsigned long dfl = paperdbReadULong(fin);
+		ret = malloc(sizeof(paperdb_table));
+		ret->id = id;
+		ret->name = nm;
+		ret->data_file_id = dfi;
+		ret->data_file_loc = dfl;
+		paperdb_column** cols = paperdbReadCols(fin, ret);		
+	}
+	return ret;
+}
+
+char	paperdbSaveTable(paperdb_sys* sys, paperdb_table* tbl, paperdb_file* f)
+{
+	FILE* fout = f->file;
+	char ret = 0;
+	// I'm of two minds whether or not to put some checking here to see if fout has been set up correctly.
+	// I'm going to skip it for now.. because I think there's good arguments to be made that fout should be set up before paperdbSaveTable is called.
+	void* tst[] = {sys, sys->files, fout, tbl};
+	char* errs[] = {"System not Initialized", "System files not initialized", "Table file stream is NULL", "Table is NULL"};
+	char* pre ="paperdbSaveTable failed. "; 
+	if(!paperdbErrorNullCheckArr(tst, 4, pre, errs, stdout))
+	{
+		unsigned long curPos = ftell(fout);
+		paperdbWriteULong(&tbl->id, fout);
+		paperdbWriteString(tbl->name, fout);
+		paperdbWriteULong(&tbl->data_file_id, fout);
+		paperdbWriteULong(&tbl->data_file_loc, fout);
+		paperdbWriteColumns(tbl->cols, tbl->numCols, fout);
+		unsigned long newPos = ftell(fout);
+		unsigned long endPos = newPos + 100;
+		paperdbWriteULong(&endPos, fout);
+		f->nextTablePos = (endPos+1);
+	}
+	return ret;
+}
+
+
